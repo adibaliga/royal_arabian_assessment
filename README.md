@@ -15,7 +15,7 @@ npm install
 cp .env.example .env.local
 ```
 
-Fill in `.env.local` with your Sanity project ID and dataset. If you want enquiries to work, add Supabase credentials too.
+Fill in `.env.local` with your Sanity project ID (e.g., `2dsie515`) and dataset. If you want enquiries to work, add Supabase credentials too.
 
 ```bash
 npm run dev
@@ -96,3 +96,10 @@ npm run seed          # seed Sanity with sample content
 npm test              # Jest (11 tests)
 npm run test:e2e      # Playwright (13 tests)
 ```
+
+## Sanity CMS
+
+**Project ID:** `2dsie515`  
+**Dataset:** `production`
+
+The destination and package schemas are in [`sanity/schemas/`](./sanity/schemas/). You can view the content structure at [sanity.io/manage](https://www.sanity.io/manage) under the `2dsie515` project.
