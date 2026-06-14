@@ -1,116 +1,98 @@
-# Royal Arabian Developer Assessment
+# Royal Arabian — China Destination Page
 
-Starter repository for the Senior Full-Stack Developer assessment.
+CMS-driven China destination page built with Next.js 14. Content comes from Sanity — nothing is hardcoded.
 
 ## Tech Stack
 
-- **Framework:** Next.js 14 (App Router)
-- **Language:** TypeScript
-- **Styling:** Tailwind CSS
-- **CMS:** Sanity
-- **Deployment:** Vercel
+- Next.js 14 (App Router), TypeScript (strict), Tailwind CSS 3.4
+- Sanity for content, Supabase for enquiry submissions
+- Deployed on Vercel
 
-## Getting Started
-
-### 1. Clone and Install
+## Quick Start
 
 ```bash
-git clone <your-repo-url>
-cd ra-developer-assessment
 npm install
-```
-
-### 2. Set Up Sanity
-
-1. Create a free Sanity account at [sanity.io](https://www.sanity.io/)
-2. Create a new project
-3. Copy the schemas from `sanity/schemas/` to your Sanity project
-4. Add sample content for China destination and at least 3 packages
-
-### 3. Configure Environment
-
-```bash
 cp .env.example .env.local
 ```
 
-Edit `.env.local` with your Sanity project details:
-
-```
-NEXT_PUBLIC_SANITY_PROJECT_ID=your_project_id
-NEXT_PUBLIC_SANITY_DATASET=production
-```
-
-### 4. Run Development Server
+Fill in `.env.local` with your Sanity project ID and dataset. If you want enquiries to work, add Supabase credentials too.
 
 ```bash
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) to see the app.
+Visit `http://localhost:3000` — it redirects to `/cn`.
+
+### Seed Sanity Content
+
+If you're starting fresh, create an API token at sanity.io/manage (Editor role), add `SANITY_API_TOKEN` to `.env.local`, then:
+
+```bash
+npm run seed
+```
+
+This uploads images from Unsplash and creates a China destination with 3 packages.
+
+## Routes
+
+| Route | What it does |
+|---|---|
+| `/` | Redirects to `/cn` |
+| `/cn` | Destination page — hero, description, highlights, packages, good-to-know |
+| `/cn/packages/[slug]` | Package detail — hero, pricing, inclusions, itinerary timeline |
+
+All pages are statically generated at build time.
 
 ## Project Structure
 
 ```
 src/
-├── app/                    # Next.js App Router pages
-│   ├── layout.tsx          # Root layout
-│   ├── page.tsx            # Homepage
-│   └── globals.css         # Global styles
-├── lib/
-│   └── sanity.ts           # Sanity client configuration
-└── types/
-    └── index.ts            # TypeScript types
-
-sanity/
-└── schemas/                # Sanity schema references
-    ├── destination.ts      # Destination schema
-    └── package.ts          # Package schema
+  app/
+    layout.tsx          # Header + Footer + EnquiryProvider wrapper
+    page.tsx            # Redirects to /cn
+    cn/
+      page.tsx          # China destination page
+      packages/[slug]/
+        page.tsx        # Package detail page
+    api/enquire/
+      route.ts          # POST endpoint -> Supabase
+  components/
+    Header.tsx          # Fixed nav, scroll effect, mobile hamburger
+    Footer.tsx          # Dark footer with links and contact
+    AnimatedSection.tsx # Scroll-reveal wrapper (IntersectionObserver)
+    EnquiryProvider.tsx # Context provider for enquiry modal
+    EnquiryForm.tsx     # Modal form, submits to /api/enquire
+    EnquireButton.tsx   # Button that triggers the modal
+    sections/
+      HeroSection.tsx
+      DestinationIntro.tsx
+      PackagesSection.tsx
+      GoodToKnowSection.tsx
+  lib/
+    sanity.ts           # Lazy Sanity client, urlFor helper
+    queries.ts          # GROQ query functions
+    supabase.ts         # Lazy Supabase client
+  types/
+    index.ts            # Destination, Package, etc.
+sanity/schemas/         # Schema definitions (reference copies)
+scripts/seed.mjs        # Sanity content seeder
 ```
 
-## Your Task
+## Design Decisions
 
-Build the China destination page at `/cn` that:
+- **Lazy clients.** Both Sanity and Supabase clients are created lazily so the app builds even without env vars configured. You get a fallback UI instead of a crash.
+- **Combined GROQ query.** The `/cn` page fetches destination + packages in one request.
+- **Zero-JS accordion.** The "Good to Know" section uses `<details>`/`<summary>` — works without JavaScript.
+- **Server Components for data.** All data fetching happens in Server Components. Only the header (scroll listener, mobile menu) and enquiry modal need client JS.
+- **AnimatedSection is thin.** It's a tiny client wrapper around IntersectionObserver. Sections stay as Server Components.
 
-1. Pulls content from Sanity CMS
-2. Displays destination info (hero, description, highlights)
-3. Shows at least 3 travel packages with pricing
-4. Is fully responsive
-5. Follows the design reference at [royalarabian.com/cn](https://royalarabian.com/cn)
-
-See the assessment document for full requirements and evaluation criteria.
-
-## Brand Colors
-
-Already configured in `tailwind.config.ts`:
-
-- Navy: `#1C355E` → `text-ra-navy`, `bg-ra-navy`
-- Orange: `#C46A3B` → `text-ra-orange`, `bg-ra-orange`
-- Gold: `#D0AF21` → `text-ra-gold`, `bg-ra-gold`
-
-## Useful Commands
+## Scripts
 
 ```bash
-npm run dev      # Start development server
-npm run build    # Build for production
-npm run start    # Start production server
-npm run lint     # Run ESLint
+npm run dev           # dev server
+npm run build         # production build
+npm run lint          # ESLint
+npm run seed          # seed Sanity with sample content
+npm test              # Jest (11 tests)
+npm run test:e2e      # Playwright (13 tests)
 ```
-
-## Deployment
-
-Deploy to Vercel:
-
-1. Push your code to GitHub
-2. Import the repo in [Vercel](https://vercel.com/)
-3. Add environment variables
-4. Deploy
-
-## Resources
-
-- [Next.js Documentation](https://nextjs.org/docs)
-- [Sanity Documentation](https://www.sanity.io/docs)
-- [Tailwind CSS Documentation](https://tailwindcss.com/docs)
-
----
-
-Good luck! 🚀
