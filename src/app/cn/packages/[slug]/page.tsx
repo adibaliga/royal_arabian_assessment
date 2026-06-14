@@ -1,17 +1,21 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { client, urlFor } from "@/lib/sanity";
+import { getClient, urlFor } from "@/lib/sanity";
 import { packageBySlug } from "@/lib/queries";
 import AnimatedSection from "@/components/AnimatedSection";
 import EnquireButton from "@/components/EnquireButton";
 import type { PackageWithDestination, ItineraryDay, GoodToKnowItem } from "@/types";
 
 export async function generateStaticParams(): Promise<{ slug: string }[]> {
-  const slugs = await client.fetch<{ slug: string }[]>(
-    `*[_type == "package" && defined(slug.current)]{ "slug": slug.current }`,
-  );
-  return slugs;
+  try {
+    const slugs = await getClient().fetch<{ slug: string }[]>(
+      `*[_type == "package" && defined(slug.current)]{ "slug": slug.current }`,
+    );
+    return slugs;
+  } catch {
+    return [];
+  }
 }
 
 export async function generateMetadata({
@@ -19,7 +23,12 @@ export async function generateMetadata({
 }: {
   params: { slug: string };
 }): Promise<Metadata> {
-  const pkg = await packageBySlug(params.slug);
+  let pkg;
+  try {
+    pkg = await packageBySlug(params.slug);
+  } catch {
+    pkg = null;
+  }
 
   if (!pkg) {
     return {
@@ -41,7 +50,12 @@ export default async function PackageDetailPage({
 }: {
   params: { slug: string };
 }) {
-  const pkg = await packageBySlug(params.slug);
+  let pkg;
+  try {
+    pkg = await packageBySlug(params.slug);
+  } catch {
+    pkg = null;
+  }
 
   if (!pkg) {
     return <PackageNotFound />;

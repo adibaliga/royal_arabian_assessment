@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import type { Destination, Package } from "@/types";
 import { chinaPageData } from "@/lib/queries";
 import AnimatedSection from "@/components/AnimatedSection";
 import HeroSection from "@/components/sections/HeroSection";
@@ -7,26 +8,42 @@ import PackagesSection from "@/components/sections/PackagesSection";
 import GoodToKnowSection from "@/components/sections/GoodToKnowSection";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const { destination } = await chinaPageData("cn");
+  try {
+    const { destination } = await chinaPageData("cn");
 
-  if (!destination) {
+    if (!destination) {
+      return {
+        title: "Destination Not Found | Royal Arabian",
+        description: "The requested destination could not be found.",
+      };
+    }
+
     return {
-      title: "Destination Not Found | Royal Arabian",
-      description: "The requested destination could not be found.",
+      title: destination.metaTitle
+        ? `${destination.metaTitle} | Royal Arabian`
+        : `${destination.name} | Royal Arabian`,
+      description:
+        destination.metaDescription || destination.tagline || destination.description?.slice(0, 160),
+    };
+  } catch {
+    return {
+      title: "Royal Arabian - Your Fellow Traveller",
+      description: "Discover extraordinary travel experiences with Royal Arabian",
     };
   }
-
-  return {
-    title: destination.metaTitle
-      ? `${destination.metaTitle} | Royal Arabian`
-      : `${destination.name} | Royal Arabian`,
-    description:
-      destination.metaDescription || destination.tagline || destination.description?.slice(0, 160),
-  };
 }
 
 export default async function ChinaDestinationPage() {
-  const { destination, packages } = await chinaPageData("cn");
+  let destination: Destination | null = null;
+  let packages: Package[] = [];
+  try {
+    const data = await chinaPageData("cn");
+    destination = data.destination;
+    packages = data.packages;
+  } catch {
+    destination = null;
+    packages = [];
+  }
 
   if (!destination) {
     return (
